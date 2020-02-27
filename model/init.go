@@ -1,10 +1,10 @@
 package model
 
 import (
+	"CapPrice/base/conf"
 	"CapPrice/logging"
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"github.com/spf13/viper"
 )
 
 var db *gorm.DB
@@ -13,10 +13,10 @@ func InitDb() {
 	var err error
 	db, err = gorm.Open("postgres",
 		fmt.Sprintf("host=localhost port=%s user=%s dbname=%s password=%s sslmode=disable",
-			viper.GetString("db_port"),
-			viper.GetString("db_user"),
-			viper.GetString("db_name"),
-			viper.GetString("db_password"),
+			conf.DBPort,
+			conf.DBUser,
+			conf.DBName,
+			conf.DBPassword,
 		),
 	)
 	if err != nil {

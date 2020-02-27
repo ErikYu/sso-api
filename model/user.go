@@ -25,7 +25,7 @@ func (user SsoUser) validate(password string) bool {
 	return pwdEncrypted == user.PwdEncrypted
 }
 
-func (user SsoUser) generateJwt() string {
+func (user SsoUser) GenerateJwt() string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
 		"sub": user.Login,
 	})
@@ -115,7 +115,7 @@ func ValidateUserByLogin(login, password string) (string, error) {
 	if !currentUser.validate(password) {
 		return "", fmt.Errorf("密码错误")
 	}
-	return currentUser.generateJwt(), nil
+	return currentUser.GenerateJwt(), nil
 }
 
 func CreateUserByCellphone(cellphone, appName string) error {

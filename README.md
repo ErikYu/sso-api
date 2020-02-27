@@ -11,5 +11,12 @@ server:
 
 crendentials:
   jwt_secret: YOUR jwt code
+
+aliyun_sms:
+  region: 
+  ak: 
+  aks: 
+  sign_name: 
+  template_code: 
 " >> conf.yaml
 ```

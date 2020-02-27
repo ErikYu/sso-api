@@ -24,7 +24,7 @@ func InitController() *gin.Engine {
 	{
 		smsGroup.POST("fetch", SmsFetchHandler)
 		smsGroup.POST("register", SmsRegisterHandler)
-		smsGroup.POST("validate", SmsValidateHandler)
+		smsGroup.POST("login", SmsLoginHandler)
 	}
 
 	apiV1 := route.Group("api/v1")

@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"CapPrice/base/conf"
 	"CapPrice/logging"
 	"CapPrice/model"
+	"CapPrice/util/sms_util"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"
@@ -39,6 +41,17 @@ func SmsFetchHandler(context *gin.Context) {
 	code := string(b)
 
 	logging.STDDebug("验证码FAKE: %s", code)
+
+	if conf.ServerMode == "prod" {
+		if err = sms_util.SendHandler(payload.Cellphone, code); err != nil {
+			logging.STDError("发送验证码失败: %v", err)
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "发送验证码失败",
+				"trace":   err.Error(),
+			})
+			return
+		}
+	}
 
 	newCode := SmsCodeDetail{
 		Code:     code,
@@ -102,7 +115,8 @@ func SmsRegisterHandler(context *gin.Context) {
 	})
 }
 
-func SmsValidateHandler(context *gin.Context) {
+func SmsLoginHandler(context *gin.Context) {
+	// check if user exist
 	var payload SmsValidatePayload
 	err := context.BindJSON(&payload)
 	if err != nil {
@@ -112,22 +126,28 @@ func SmsValidateHandler(context *gin.Context) {
 		return
 	}
 
-	var isCodeValidate = false
-	for _, codeDetail := range UserSmsCodeMap[payload.Cellphone] {
-		fmt.Println(codeDetail.Code)
-		if codeDetail.Code == payload.VerifyCode && time.Now().Before(codeDetail.ExpireAt) {
-			isCodeValidate = true
-		}
-	}
-	if !isCodeValidate {
+	// check if verifyCode correct
+	if !checkIfVerifyCodeValid(payload.Cellphone, payload.VerifyCode) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "验证码错误",
 		})
 		return
 	}
 
+	// check if cellphone exists
+	user := model.GetUserByCellphone(payload.Cellphone)
+	if user.ID == 0 {
+		logging.STDError("登录失败，该手机号不存在: %s", payload.Cellphone)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "登录失败，该手机号不存在",
+		})
+		return
+	}
+
+	// create jwt
 	context.JSON(http.StatusOK, gin.H{
 		"message": "ok",
+		"data":    user.GenerateJwt(),
 	})
 }
 
