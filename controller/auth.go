@@ -13,6 +13,10 @@ type RegisterPayload struct {
 	Application string `json:"application"`
 }
 
+type AuthCheckPayload struct {
+	Token string `json:"token"`
+}
+
 func RegisterUser(context *gin.Context) {
 	var payload RegisterPayload
 	err := context.BindJSON(&payload)
@@ -60,4 +64,28 @@ func LoginHandler(context *gin.Context) {
 		"message": "ok",
 		"data":    jwt,
 	})
+}
+
+func CheckTokenHandler(context *gin.Context) {
+	var payload AuthCheckPayload
+	err := context.ShouldBind(&payload)
+	if err != nil || payload.Token == "" {
+		logging.STDError("获取token失败")
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "获取token失败",
+		})
+		return
+	}
+	if model.ValidateJwt(payload.Token) {
+		context.JSON(http.StatusOK, gin.H{
+			"message": "ok",
+		})
+		return
+	} else {
+		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "token验证失败",
+		})
+		return
+	}
+
 }

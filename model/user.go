@@ -151,3 +151,19 @@ func CreateUserByCellphone(cellphone, appName string) error {
 		return nil
 	})
 }
+
+func ValidateJwt(token string) bool {
+	var mapping jwt.MapClaims
+	_, err := jwt.ParseWithClaims(token, &mapping, func(token *jwt.Token) (i interface{}, e error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		SECRET := viper.GetString("crendentials.jwt_secret")
+		return []byte(SECRET), nil
+	})
+	if err != nil {
+		logging.STDError("Token非法%v\n", err)
+		return false
+	}
+	return true
+}

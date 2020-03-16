@@ -18,6 +18,7 @@ func InitController() *gin.Engine {
 	{
 		authGroup.POST("/register", RegisterUser)
 		authGroup.POST("/login", LoginHandler)
+		authGroup.POST("/check", CheckTokenHandler)
 	}
 
 	smsGroup := route.Group("api/sms")
