@@ -73,17 +73,20 @@ func CheckTokenHandler(context *gin.Context) {
 		logging.STDError("获取token失败")
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "获取token失败",
+			"data":    false,
 		})
 		return
 	}
 	if model.ValidateJwt(payload.Token) {
 		context.JSON(http.StatusOK, gin.H{
 			"message": "ok",
+			"data":    true,
 		})
 		return
 	} else {
 		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "token验证失败",
+			"data":    false,
 		})
 		return
 	}
